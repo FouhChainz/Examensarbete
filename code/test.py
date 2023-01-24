@@ -26,6 +26,10 @@ def clear_widgets(frame):
     for widget in frame.winfo_children():
         widget.destroy()
 
+#Define a function to close the window
+def close():
+   root.destroy()
+   root.quit()
 
 def load_main():
     clear_widgets(search)
@@ -52,6 +56,8 @@ def load_main():
         bg="#28393a",
         command=lambda: load_search()
     ).pack(pady=20)
+    # Create a Button to call close()
+    exit_app=tk.Button(main, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
 
     tk.Button(
         main,
@@ -101,12 +107,16 @@ def load_search(searchString=searchString):
         command=lambda: load_main()
     ).grid(row=0, column=0)
 
+    # Create a Button to call close()
+    exit_app=tk.Button(search, text="Kill App", command=close).grid(row=0, column=1,columnspan=5)
+
     #Load area where you can see the letters pressed
     textArea=tk.Text(search,
                      height=5,
                      width=50
                      )
     textArea.grid(row=1, column=2,columnspan=15)
+
 
     #Function that controls logic behind button presses
     def select(value, textArea=textArea,searchString=searchString):
@@ -115,7 +125,7 @@ def load_search(searchString=searchString):
             textArea.insert(INSERT, ' ')
         #Loads next page
         elif value=='Enter':
-            load_frame3()
+            load_scale()
         #Remove last pressed letter
         elif value == '←':
             i=textArea.get(1.0, END)
@@ -226,7 +236,7 @@ def load_search(searchString=searchString):
             varRow+=1
 
 #Load new frame
-def load_frame3():
+def load_scale():
     clear_widgets(search)
     clear_widgets(main)
     #Stack Frame 3 over the others
@@ -238,13 +248,19 @@ def load_frame3():
     # Add Save button that saves to database
     # Confirm popup with all data - Product - date/weight/weather. After confirm load_frame1()
 
-
+    # Create a Button to call close()
+    exit_app=tk.Button(scale, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
     print('Value searched: ' + load_search.searchString)
 
 # Initialize app
 root=tk.Tk()
+root.attributes('-fullscreen',True)
 root.title("Smart Scale")
 root.geometry("800x480")
+
+
+
+
 # root.resizable(False, False)
 
 # Create a frame widget and places it in grid location
@@ -255,7 +271,6 @@ scale=tk.Frame(root, width=800, height=480, bg=bg_color)
 # Sort grid in all frames
 for frame in (main, search, scale):
     frame.grid(row=0, column=0, sticky="nesw")
-
 # Load start page
 load_main()
 
