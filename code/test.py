@@ -1,16 +1,30 @@
 import tkinter as tk
 from tkinter import *
 import sqlite3
+import time
+import serial
 
+searchString= 'init value'
+#Background color dark-green
 bg_color="#3d6466"
-searchString = 'init value'
 
 
-class Kiosk(tk.Tk):
+ser=serial.Serial(
+    port='/dev/ttyUSB0',
+    baudrate=9600,
+    parity=serial.PARITY_NONE,
+    stopbits=serial.STOPBITS_ONE,
+    bytesize=serial.EIGHTBITS,
+    timeout=None)
+
+def search_string():
+    print(ser.readline())
+
+class SmartScale(tk.Tk):
     def __init__(self):
         super().__init__()
 
-
+#Initiate and open connection to database
 def fetch_db():
     connection=sqlite3.connect("products.db")
     c=connection.cursor()
@@ -20,21 +34,23 @@ def fetch_db():
     connection.commit()
     connection.close()
 
-
+#Removes all widgets in a frame to prepare for next frame
 def clear_widgets(frame):
     #Select all frame widgets and delete them
     for widget in frame.winfo_children():
         widget.destroy()
 
-#Define a function to close the window
+#Kill application
 def close():
    root.destroy()
    root.quit()
 
+
+#Load main(start) page
 def load_main():
     clear_widgets(search)
     clear_widgets(scale)
-    #Stack Main Frame above other frames
+    #Stack Main frame above other frames
     main.tkraise()
     #Prevent widgets from modifying the frame
     main.pack_propagate(False)
@@ -56,8 +72,9 @@ def load_main():
         bg="#28393a",
         command=lambda: load_search()
     ).pack(pady=20)
+
     # Create a Button to call close()
-    exit_app=tk.Button(main, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
+    tk.Button(main, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
 
     tk.Button(
         main,
@@ -81,14 +98,14 @@ def load_main():
 def load_search(searchString=searchString):
     clear_widgets(main)
     clear_widgets(scale)
-    #Stack Search Frame above other frames
+    #Stack Search frame above other frames
     search.tkraise()
     main.pack_propagate(False)
 
-    #Fetch from database
+    #Fetch database
     fetch_db()
 
-    # Title widget to help
+    # Title text
     tk.Label(
         search,
         text="Sök efter önskad produkt",
@@ -108,9 +125,9 @@ def load_search(searchString=searchString):
     ).grid(row=0, column=0)
 
     # Create a Button to call close()
-    exit_app=tk.Button(search, text="Kill App", command=close).grid(row=0, column=1,columnspan=5)
+    tk.Button(search, text="Kill App", command=close).grid(row=0, column=1,columnspan=5)
 
-    #Load area where you can see the letters pressed
+    #Load textbox that shows input
     textArea=tk.Text(search,
                      height=5,
                      width=50
@@ -243,14 +260,24 @@ def load_scale():
     scale.tkraise()
     scale.pack_propagate(False)
 
+    weightText = tk.Text(scale,
+                         height=1,
+                         width=20,
+                         font=('Arial',60)
+                         )
+    weightText.insert(INSERT,search_string())
+    weightText.grid(row=0,column=0,pady=50,padx=50)
+
+
+
     # Todo
     # Add live output from scale
     # Add Save button that saves to database
     # Confirm popup with all data - Product - date/weight/weather. After confirm load_frame1()
 
     # Create a Button to call close()
-    exit_app=tk.Button(scale, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
-    print('Value searched: ' + load_search.searchString)
+    tk.Button(scale, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
+    #  print('Value searched: ' + load_search.searchString)
 
 # Initialize app
 root=tk.Tk()
