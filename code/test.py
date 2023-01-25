@@ -8,7 +8,6 @@ searchString= 'init value'
 #Background color dark-green
 bg_color="#3d6466"
 
-
 ser=serial.Serial(
     port='/dev/ttyUSB0',
     baudrate=9600,
@@ -17,8 +16,10 @@ ser=serial.Serial(
     bytesize=serial.EIGHTBITS,
     timeout=None)
 
-def search_string():
-    print(ser.readline())
+def search_output():
+    x = ser.readline()
+    return x
+
 
 class SmartScale(tk.Tk):
     def __init__(self):
@@ -263,9 +264,8 @@ def load_scale():
     weightText = tk.Text(scale,
                          height=1,
                          width=20,
-                         font=('Arial',60)
+                         font=('Arial',40)
                          )
-    weightText.insert(INSERT,search_string())
     weightText.grid(row=0,column=0,pady=50,padx=50)
 
 
@@ -277,7 +277,8 @@ def load_scale():
 
     # Create a Button to call close()
     tk.Button(scale, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
-    #  print('Value searched: ' + load_search.searchString)
+
+    weightText.insert(INSERT,search_output())
 
 # Initialize app
 root=tk.Tk()
