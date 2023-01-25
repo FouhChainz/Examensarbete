@@ -7,8 +7,7 @@ ser=serial.Serial(
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
-    timeout=None
-)
+    timeout=None)
 
 while 1:
     x=ser.readline()
