@@ -8,6 +8,9 @@ import weather
 
 
 searchString= 'init value'
+todays_date = datetime.date.today()
+weather_status = weather.weather_description
+weather_temp = weather.current_temperature
 
 #Background color dark-green
 bg_color="#3d6466"
@@ -286,7 +289,37 @@ def load_scale():
               ).grid(row=2,column=0)
 
     vvalue = tk.StringVar(scale, value="Ställ din produkt på vågen och tryck på 'VÄG' ")
-    tk.Label(scale, textvariable = vvalue,height=5,width=50,padx=5,pady=5,font=("Arial",15)).grid(row=1,column=0,padx=50,pady=10)
+    tk.Label(scale,
+             textvariable = vvalue,
+             height=5,
+             width=50,
+             padx=5,pady=5,
+             font=("Arial",15)
+             ).grid(row=1,column=0,padx=50,pady=10)
+
+    tk.Label(scale,
+             text=todays_date,
+             height=5,
+             width=30,
+             padx=5, pady=5,
+             font=("Arial", 15)
+             ).grid(row=3, column=0, padx=50, pady=10)
+
+    tk.Label(scale,
+             text=weather_temp,
+             height=5,
+             width=20,
+             padx=5, pady=5,
+             font=("Arial", 15)
+             ).grid(row=3, column=1, padx=50, pady=10)
+    tk.Label(scale,
+             text=weather_status,
+             height=5,
+             width=20,
+             padx=5, pady=5,
+             font=("Arial", 15)
+             ).grid(row=3, column=2, padx=50, pady=10)
+
 
 #Initialize app
 root=tk.Tk()
