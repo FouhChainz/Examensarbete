@@ -300,23 +300,20 @@ def load_scale():
     tk.Label(scale,
              text=todays_date,
              height=5,
-             width=30,
-             padx=5, pady=5,
+             width=20,
              font=("Arial", 15)
              ).grid(row=3, column=0, padx=50, pady=10)
 
     tk.Label(scale,
-             text=weather_temp,
+             text=weather_temp + "ºC",
              height=5,
-             width=20,
-             padx=5, pady=5,
+             width=15,
              font=("Arial", 15)
              ).grid(row=3, column=1, padx=50, pady=10)
     tk.Label(scale,
              text=weather_status,
              height=5,
-             width=20,
-             padx=5, pady=5,
+             width=15,
              font=("Arial", 15)
              ).grid(row=3, column=2, padx=50, pady=10)
 
