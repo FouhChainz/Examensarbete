@@ -16,10 +16,12 @@ ser=serial.Serial(
     bytesize=serial.EIGHTBITS,
     timeout=None)
 
-def search_output():
+def serial_write():
+    ser.write(b's')
+
+def serial_read():
     x = ser.readline()
     return x
-
 
 class SmartScale(tk.Tk):
     def __init__(self):
@@ -257,16 +259,9 @@ def load_search(searchString=searchString):
 def load_scale():
     clear_widgets(search)
     clear_widgets(main)
-    #Stack Frame 3 over the others
+     #Stack Frame 3 over the others
     scale.tkraise()
     scale.pack_propagate(False)
-
-    weightText = tk.Text(scale,
-                         height=1,
-                         width=20,
-                         font=('Arial',40)
-                         )
-    weightText.grid(row=0,column=0,pady=50,padx=50)
 
 
 
@@ -278,11 +273,26 @@ def load_scale():
     # Create a Button to call close()
     tk.Button(scale, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
 
-    weightText.insert(INSERT,search_output())
+    #Create a button to return to previous frame
+    tk.Button(scale, text="BACK", command=lambda: load_search()).grid(row=0,column=0)
+
+
+    def reWeigh():
+        serial_write()
+        output = serial_read()
+        vvalue.set(output)
+
+    tk.Button(scale,
+              text="VÄG",
+              command=lambda:reWeigh()
+              ).grid(row=2,column=0)
+
+    vvalue = tk.StringVar(scale, value="Ställ din produkt på vågen och tryck på 'VÄG' ")
+    tk.Label(scale, textvariable = vvalue,height=5,width=50,padx=5,pady=5,font=("Arial",15)).grid(row=1,column=0,padx=50,pady=10)
 
 # Initialize app
 root=tk.Tk()
-root.attributes('-fullscreen',True)
+#root.attributes('-fullscreen',True)
 root.title("Smart Scale")
 root.geometry("800x480")
 
