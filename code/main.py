@@ -3,11 +3,16 @@ from tkinter import *
 import sqlite3
 import time
 import serial
+import datetime
+import weather
+
 
 searchString= 'init value'
+
 #Background color dark-green
 bg_color="#3d6466"
 
+#Initialize Serial Connection with USB-port
 ser=serial.Serial(
     port='/dev/ttyUSB0',
     baudrate=9600,
@@ -16,32 +21,37 @@ ser=serial.Serial(
     bytesize=serial.EIGHTBITS,
     timeout=None)
 
+#Create function to send a signal to scale that it should weigh current object
 def serial_write():
     ser.write(b's')
 
+#Create function to read full line from scale and return it
 def serial_read():
     x = ser.readline()
     return x
 
+#Gör den ens något? Testa ta bort?
 class SmartScale(tk.Tk):
     def __init__(self):
         super().__init__()
 
 #Initiate and open connection to database
 def fetch_db():
+    #Connect to database
     connection=sqlite3.connect("products.db")
+    #Initiate cursor
     c=connection.cursor()
 
-
-
+    #Send changes and close connection
     connection.commit()
     connection.close()
 
-#Removes all widgets in a frame to prepare for next frame
-def clear_widgets(frame):
-    #Select all frame widgets and delete them
-    for widget in frame.winfo_children():
-        widget.destroy()
+#Removes all widgets in all frames to prepare for next frame
+def clear_widgets():
+    for frame in (main, search, scale):
+        #Select all frame widgets and delete them
+        for widget in frame.winfo_children():
+         widget.destroy()
 
 #Kill application
 def close():
@@ -51,8 +61,7 @@ def close():
 
 #Load main(start) page
 def load_main():
-    clear_widgets(search)
-    clear_widgets(scale)
+    clear_widgets()
     #Stack Main frame above other frames
     main.tkraise()
     #Prevent widgets from modifying the frame
@@ -69,7 +78,7 @@ def load_main():
     #Create button widget
     tk.Button(
         main,
-        text="Ny Sökning",
+        text="Ny Vägning",
         width=50,
         height=10,
         bg="#28393a",
@@ -81,26 +90,17 @@ def load_main():
 
     tk.Button(
         main,
-        text="Tidigare Sökningar",
+        text="Se lagrad data",
         width=50,
         height=10,
         bg="#28393a",
         command=lambda: load_search()
     ).pack(pady=20)
 
-    tk.Button(
-        main,
-        text="Lägg in ny Produkt- ToDo?",
-        width=50,
-        height=10,
-        bg="#28393a"
-        # , command=lambda: load_search()
-    ).pack(pady=20)
 
 
 def load_search(searchString=searchString):
-    clear_widgets(main)
-    clear_widgets(scale)
+    clear_widgets()
     #Stack Search frame above other frames
     search.tkraise()
     main.pack_propagate(False)
@@ -224,7 +224,7 @@ def load_search(searchString=searchString):
         else:
             textArea.insert(INSERT, value)
             load_search.searchString = textArea.get(1.0, END)
-            print(load_search.searchString)
+            print(load_search.searchString) #For testing purposes REMOVE LATER ON
     varRow=2
     varColumn=1
 
@@ -255,18 +255,16 @@ def load_search(searchString=searchString):
             varColumn=1
             varRow+=1
 
-#Load new frame
+#Load frame where you weigh products
 def load_scale():
-    clear_widgets(search)
-    clear_widgets(main)
-     #Stack Frame 3 over the others
+    clear_widgets()
+    #Stack Frame 3 over the others
     scale.tkraise()
     scale.pack_propagate(False)
 
 
 
     # Todo
-    # Add live output from scale
     # Add Save button that saves to database
     # Confirm popup with all data - Product - date/weight/weather. After confirm load_frame1()
 
@@ -290,28 +288,25 @@ def load_scale():
     vvalue = tk.StringVar(scale, value="Ställ din produkt på vågen och tryck på 'VÄG' ")
     tk.Label(scale, textvariable = vvalue,height=5,width=50,padx=5,pady=5,font=("Arial",15)).grid(row=1,column=0,padx=50,pady=10)
 
-# Initialize app
+#Initialize app
 root=tk.Tk()
-#root.attributes('-fullscreen',True)
+#root.attributes('-fullscreen',True)  ---Commented out for testing phase.
 root.title("Smart Scale")
 root.geometry("800x480")
 
+#root.resizable(False, False) -- Commented out for now
 
-
-
-# root.resizable(False, False)
-
-# Create a frame widget and places it in grid location
+#Create a frame widget and places it in grid location
 main=tk.Frame(root, width=800, height=480, bg=bg_color)
 search=tk.Frame(root, width=800, height=480, bg=bg_color)
 scale=tk.Frame(root, width=800, height=480, bg=bg_color)
 
-# Sort grid in all frames
+#Sort grid in all frames
 for frame in (main, search, scale):
     frame.grid(row=0, column=0, sticky="nesw")
-# Load start page
-load_main()
 
+#Load start page
+load_main()
 # Run app
 root.mainloop()
 
