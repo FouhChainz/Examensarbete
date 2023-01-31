@@ -12,11 +12,11 @@ searchString='init value'
 todays_date=datetime.date.today()
 weather_status=weather.weather_description
 weather_temp=weather.current_temperature
-date_string = todays_date.strftime('%Y-%m-%d')
+date_string=todays_date.strftime('%Y-%m-%d')
 
 flagga=0
 product_weight=0
-product_name = "testy"
+product_name="testy"
 
 # Background color dark-green
 bg_color="#3d6466"
@@ -42,13 +42,10 @@ def serial_read ():
     return x
 
 
-def insert_into_database (product=product_name,
-                          vikt=product_weight,
-                          datum=todays_date,
-                          temperature=weather_temp,
-                          weather_status=weather_status):
-    print(product)
-    print(vikt)
+def write_to_database (
+        datum=todays_date,
+        temperature=weather_temp,
+        weather_status=weather_status):
     print(datum)
     print(temperature)
     print(weather_status)
@@ -56,15 +53,16 @@ def insert_into_database (product=product_name,
         connection=mysql.connector.connect(host='localhost',
                                            database='products',
                                            user='user0',
-                                           password='')
+                                           password='hejsan00')
         cursor=connection.cursor()
 
         name=product_name
+        weight=product_weight[ 8:12 ]
 
         mySql_insert_query="""CREATE TABLE IF NOT EXISTS """ + name + """( 
-	                                Datum DATE NOT NULL,
-	                                Vikt DOUBLE(4,2) NOT NULL,
-	                                PRIMARY KEY(Datum)
+                                    Datum DATE NOT NULL,
+                                    Vikt DOUBLE(4,2) NOT NULL,
+                                    PRIMARY KEY(Datum, Vikt)
                                     );"""
         mySql_insert_query2="""
                                 INSERT INTO """ + name + """(Datum, Vikt) 
@@ -73,15 +71,45 @@ def insert_into_database (product=product_name,
                                 INSERT INTO Väder(Datum, Temperatur, Väder_Status)
                                     VALUES (%s,%s,%s);"""
 
-        value= product
-        value2=(product, date_string,vikt)
-        value3=(date_string ,temperature,weather_status)
-        cursor.execute(mySql_insert_query,)
-        cursor.execute(mySql_insert_query2,value2)
-        cursor.execute(mySql_insert_query3,value3)
+        value2=(date_string, weight)
+        value3=(date_string, temperature, weather_status)
+        cursor.execute(mySql_insert_query, )
+        cursor.execute(mySql_insert_query2, value2)
+        cursor.execute(mySql_insert_query3, value3)
 
         connection.commit()
-        print("Record inserted successfully into %s table", product)
+        tk.messagebox.showinfo(print("Record inserted successfully into %s table"))
+
+
+    except mysql.connector.Error as error:
+        tk.messagebox.showinfo(print("Failed to insert into MySQL table {}".format(error)))
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+
+
+def read_from_database ():
+    try:
+        connection=mysql.connector.connect(host='localhost',
+                                           database='products',
+                                           user='user0',
+                                           password='hejsan00')
+        cursor=connection.cursor()
+
+        name=product_name
+        weight=product_weight[ 8:12 ]
+
+        mySql_insert_query="""SHOW TABLES LIKE """ + \
+                           name + \
+                           """;"""
+
+        return_statement=cursor.execute(mySql_insert_query)
+
+        connection.commit()
+        print("Record inserted successfully into %s table")
 
     except mysql.connector.Error as error:
         print("Failed to insert into MySQL table {}".format(error))
@@ -133,7 +161,7 @@ def load_main ():
         text="Utrustning för sparande av vägd produkt",
         bg=bg_color,
         fg="white",
-    ).pack(pady=25)
+    ).pack(pady=20)
 
     # Create button widget
     tk.Button(
@@ -146,7 +174,7 @@ def load_main ():
     ).pack(pady=20)
 
     # Create a Button to call close()
-    tk.Button(main, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
+    tk.Button(main, text="Kill App", command=close).grid(row=0, column=1, columnspan=5, padx=5, pady=5)
 
     tk.Button(
         main,
@@ -330,23 +358,31 @@ def load_scale ():
     # Confirm popup with all data - Product - date/weight/weather. After confirm load_frame1()
 
     # Create a Button to call close()
-    tk.Button(scale, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
+    tk.Button(scale, text="Kill App", command=close).grid(row=0, column=2, pady=2, padx=2)
 
     # Create a button to return to previous frame
     tk.Button(scale, text="BACK", command=lambda:load_search()).grid(row=0, column=0)
 
     def reWeigh ():
-        insert_into_database()
         serial_write()
         output=serial_read()
         global product_weight
         product_weight=output
-        vvalue.set(output)
+        vvalue.set(product_weight)
+        write_to_database()
+
+    tk.Label(scale,
+             text=product_name,
+             width=20,
+             bg=bg_color,
+             fg='black',
+             font=('Arial', 30, 'bold', 'underline')
+             ).grid(row=0, column=1, pady=6)
 
     tk.Button(scale,
               text="VÄG",
               command=lambda:reWeigh()
-              ).grid(row=2, column=0)
+              ).grid(row=2, column=1, pady=20, ipadx=5, ipady=5)
 
     vvalue=tk.StringVar(scale, value="Ställ din produkt på vågen och tryck på 'VÄG' ")
     tk.Label(scale,
@@ -354,23 +390,42 @@ def load_scale ():
              height=5,
              width=50,
              font=("Arial", 15)
-             ).grid(row=1, column=0, padx=20, pady=10)
+             ).grid(row=1, column=0, columnspan=3, padx=20, pady=10)
 
+    tk.Label(scale,
+             text="Dagens Datum",
+             height=5,
+             width=20,
+             font=('Arial', 15, 'bold')
+             ).grid(row=3, column=0, padx=20)
     tk.Label(scale,
              text=todays_date,
              height=5,
              width=20
-             ).pack(padx=20, pady=20, side=LEFT)
+             ).grid(row=4, column=0, pady=10)
+
+    tk.Label(scale,
+             text="Temperatur (°C)",
+             height=5,
+             width=20,
+             font=('Arial', 15, 'bold')
+             ).grid(row=3, column=1, padx=20)
     tk.Label(scale,
              text=weather_temp,
              height=5,
              width=15
-             ).pack(padx=20, side=LEFT)
+             ).grid(row=4, column=1, pady=10)
+    tk.Label(scale,
+             text="Väder",
+             height=5,
+             width=15,
+             font=('Arial', 15, 'bold')
+             ).grid(row=3, column=2, padx=20)
     tk.Label(scale,
              text=weather_status,
              height=5,
              width=15
-             ).pack(padx=20, side=LEFT)
+             ).grid(row=4, column=2, pady=10)
 
 
 def load_stats ():
@@ -380,10 +435,12 @@ def load_stats ():
     stats.pack_propagate(False)
 
     tk.Label(stats,
-             text='hej',
-             height=5,
-             width=15
-             ).pack(padx=20, side=LEFT)
+             text=read_from_database.return_statement,
+             width=20,
+             bg=bg_color,
+             fg='black',
+             font=('Arial', 30, 'bold', 'underline')
+             ).grid(row=0, column=0)
 
 
 # Initialize app
