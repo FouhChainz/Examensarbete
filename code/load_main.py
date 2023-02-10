@@ -1,20 +1,21 @@
 import tkinter as tk
 from tkinter import *
 import load_search
-
-
-
+import testy
 #Background color dark-green
 bg_color="#3d6466"
 main=tk.Frame(testy.main, width=800, height=480, bg=bg_color)
 
+def clear_widgets():
+    for widget in main.winfo_children():
+        widget.destroy()
 
 def init():
     clear_widgets()
     # Stack Main frame above other frames
-    testy.main.tkraise()
+    main.tkraise()
     # Prevent widgets from modifying the frame
-    testy.main.pack_propagate(False)
+    main.pack_propagate(False)
 
 # Create label widget for instructions
 tk.Label(
@@ -35,7 +36,7 @@ tk.Button(
 ).pack(pady=20)
 
 # Create a Button to call close()
-tk.Button(main, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
+tk.Button(main, text="Kill App", command=testy.close).grid(row=0, column=1, columnspan=5)
 
 tk.Button(
     main,

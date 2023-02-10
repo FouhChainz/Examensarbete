@@ -53,7 +53,7 @@ def write_to_database (
         connection=mysql.connector.connect(host='localhost',
                                            database='products',
                                            user='user0',
-                                           password='hejsan00')
+                                           password='')
         cursor=connection.cursor()
 
         name=product_name

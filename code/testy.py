@@ -4,7 +4,9 @@ import time
 import serial
 import datetime
 import weather
-from load_main import *
+import load_main
+import load_search
+import load_scale
 
 
 searchString= 'init value'
@@ -25,20 +27,15 @@ bg_color="#3d6466"
 #     timeout=None)
 
 #Create function to send a signal to scale that it should weigh current object
-def serial_write():
-    ser.write(b's')
+#def serial_write():
+#  ser.write(b's')
 
 #Create function to read full line from scale and return it
-def serial_read():
-    x = ser.readline()
-    return x
+#def serial_read():
+#   x = ser.readline()
+#  return x
 
-#Gör den ens något? Testa ta bort?
-class SmartScale(tk.Tk):
-    def __init__(self):
-        super().__init__()
 
-#Initiate and open connection to database
 
 
 #Removes all widgets in all frames to prepare for next frame
@@ -68,7 +65,7 @@ scale=tk.Frame(root, width=800, height=480, bg=bg_color)
 
 #Sort grid in all frames
 for frame in (main, search, scale):
-    frame.grid(row=0, column=0, sticky="nesw")
+ frame.grid(row=0, column=0, sticky="nesw")
 
 #Load start page
 load_main.init()
