@@ -490,6 +490,13 @@ def load_stats ():
              font=('Arial', 20, 'underline', 'bold')
              ).grid(row=0, column=1, padx=100, pady=20)
 
+    tree_frame = Frame(stats)
+    tree_frame.pack(pady=80)
+
+    # Skapa scrollbar
+    tree_scroll = Scrollbar(tree_frame)
+    tree_scroll.pack(side=RIGHT, fill=Y)
+
     # Konfigurering av Treeview som visar informationen
     style=ttk.Style()
     style.configure("Treeview",
@@ -500,7 +507,10 @@ def load_stats ():
                     )
 
     # Skapar en Treeview som skall hålla informationen
-    my_tree=ttk.Treeview(stats)
+    my_tree=ttk.Treeview(tree_frame)
+
+    my_tree.configure(yscrollcommand=tree_scroll.set)
+    tree_scroll.config(command=my_tree.yview)
 
     # Initierar de kolumner som skall finnas i Treeviewen och namnsätter dem
     my_tree[ 'columns' ]=("Datum", "Vikt")
@@ -532,7 +542,7 @@ def load_stats ():
                            tags=('oddrow'))
         count+=1
 
-    my_tree.pack(pady=80)
+    my_tree.pack()
 
 
 # Initialiserar applikationen
