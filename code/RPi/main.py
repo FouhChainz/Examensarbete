@@ -35,7 +35,7 @@ product_name="testy"
 bg_color="#3d6466"
 
 
-# Initialize Serial Connection with USB-port
+# Initierar seriell uppkoppling till vågen
 # ser=serial.Serial(
 #     port='/dev/ttyUSB0',
 #     baudrate=9600,
@@ -64,25 +64,25 @@ def write_to_database (
     print(temperature)
     print(weather_status)
     try:
-        connection=mysql.connector.connect(host='localhost',
+        connection=mysql.connector.connect(host='172.20.10.3',
                                            database='products',
                                            user='user0',
-                                           password='')
+                                           password='hejsan00')
         cursor=connection.cursor()
 
         name=product_name
         weight=product_weight[ 8:12 ]
 
         mySql_insert_query="""CREATE TABLE IF NOT EXISTS """ + name + """( 
-                                    Datum DATE NOT NULL,
-                                    Vikt DOUBLE(4,2) NOT NULL,
-                                    PRIMARY KEY(Datum, Vikt)
+                                    date DATE NOT NULL,
+                                    amount FLOAT NOT NULL,
+                                    PRIMARY KEY(date, amount)
                                     );"""
         mySql_insert_query2="""
-                                INSERT INTO """ + name + """(Datum, Vikt) 
+                                INSERT INTO """ + name + """(date, amount) 
                                    VALUES (%s, %s); """
         mySql_insert_query3="""
-                                INSERT INTO Väder(Datum, Temperatur, Väder_Status)
+                                INSERT IGNORE INTO Väder(Datum, Temperatur, Väder_Status)
                                     VALUES (%s,%s,%s);"""
 
         value2=(date_string, weight)
@@ -92,11 +92,11 @@ def write_to_database (
         cursor.execute(mySql_insert_query3, value3)
 
         connection.commit()
-        tk.messagebox.showinfo(print("Record inserted successfully into %s table"))
+        tk.messagebox.showinfo("Success!","Värdet sparat i databasen!")
 
 
     except mysql.connector.Error as error:
-        tk.messagebox.showinfo(print("Failed to insert into MySQL table {}".format(error)))
+        tk.messagebox.showinfo("Fel","Failed to insert into MySQL table {}".format(error))
 
     finally:
         if connection.is_connected():
@@ -108,7 +108,7 @@ def write_to_database (
 # Skapa en funktion som tar in en sökning från tangentbordet och returnerar alla objekt från databasen i den tabellen
 def read_from_database ():
     try:
-        connection=mysql.connector.connect(host='localhost',
+        connection=mysql.connector.connect(host='172.20.10',
                                            database='products',
                                            user='user0',
                                            password='hejsan00')
@@ -374,6 +374,7 @@ def load_scale ():
     clear_widgets()
     scale.tkraise()
     scale.pack_propagate(False)
+    output=None
 
     # Todo
     # Add Save button that saves to database
