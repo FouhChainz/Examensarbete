@@ -267,7 +267,7 @@ def load_search (searchString=searchString):
         elif value == 'Caps':
             capsButtons=[ 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Å', '←',
                           'CAPS', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ö', 'Ä', 'Enter',
-                          '', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '-',
+                          '', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '_',
                           'Space' ]
 
             varRow=2
@@ -304,7 +304,7 @@ def load_search (searchString=searchString):
 
             buttons=[ 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'å', '←',
                       'Caps', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä', 'Enter',
-                      '', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '-',
+                      '', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '_',
                       'Space' ]
 
             for button in buttons:
@@ -341,7 +341,7 @@ def load_search (searchString=searchString):
 
     buttons=[ 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'å', '←',
               'Caps', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä', 'Enter',
-              '', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '-',
+              '', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '_',
               'Space' ]
     # Logik för att visa tangentbord på skärm
     for button in buttons:
