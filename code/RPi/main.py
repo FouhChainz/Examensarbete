@@ -94,7 +94,7 @@ def write_to_database (
 
 
     except mysql.connector.Error as error:
-        tk.messagebox.showinfo("Fel","Failed to insert into MySQL table {}".format(error))
+        tk.messagebox.showinfo("Fel","Kunde ej spara värdet i databasen {}".format(error))
 
     finally:
         if connection.is_connected():
@@ -106,7 +106,7 @@ def write_to_database (
 # Skapa en funktion som tar in en sökning från tangentbordet och returnerar alla objekt från databasen i den tabellen
 def read_from_database ():
     try:
-        connection=mysql.connector.connect(host='172.20.10',
+        connection=mysql.connector.connect(host='172.20.10.3',
                                            database='products',
                                            user='user0',
                                            password='hejsan00')
@@ -127,7 +127,7 @@ def read_from_database ():
 
 
     except mysql.connector.Error as error:
-        print("Failed to read from MySQL table {}".format(error))
+        print("Kunde inte läsa värdet från databasen {}".format(error))
 
     finally:
         if connection.is_connected():
@@ -418,50 +418,50 @@ def load_scale ():
              textvariable=vvalue,
              height=5,
              width=50,
-             font=("Arial", 15)
+             font=("Arial", 12)
              ).grid(row=1, column=0, columnspan=3, padx=20, pady=10)
     # Label är rubrik som visas ovanför dagens datum
     tk.Label(scale,
              text="Dagens Datum",
              height=5,
              width=20,
-             font=('Arial', 15, 'bold')
-             ).grid(row=3, column=0, padx=20)
+             font=('Arial', 10, 'bold')
+             ).grid(row=3, column=0, padx=5)
     # Label som visar dagens datum på skärmen
     tk.Label(scale,
              text=todays_date,
-             height=5,
-             width=20
-             ).grid(row=4, column=0, pady=10)
+             height=3,
+             width=10
+             ).grid(row=4, column=0, pady=5)
 
     # Label är rubrik som visas ovanför dagens temperatur
     tk.Label(scale,
              text="Temperatur (°C)",
              height=5,
              width=20,
-             font=('Arial', 15, 'bold')
-             ).grid(row=3, column=1, padx=20)
+             font=('Arial', 10, 'bold')
+             ).grid(row=3, column=1, padx=5)
 
     # Label som visar dagens temperatur
     tk.Label(scale,
              text=weather_temp,
-             height=5,
-             width=15
-             ).grid(row=4, column=1, pady=10)
+             height=3,
+             width=10
+             ).grid(row=4, column=1, pady=5)
 
     # Label är rubrik som visas ovanför dagens väderstatus
     tk.Label(scale,
              text="Väder",
              height=5,
-             width=15,
-             font=('Arial', 15, 'bold')
+             width=20,
+             font=('Arial', 10, 'bold')
              ).grid(row=3, column=2, padx=20)
 
     # Label som visar dagens väderstatus i textform för den inställda staden
     tk.Label(scale,
              text=weather_status,
-             height=5,
-             width=15
+             height=3,
+             width=10
              ).grid(row=4, column=2, pady=10)
 
 
@@ -487,8 +487,8 @@ def load_stats ():
              text="REGISTRERADE VÄGNINGAR AV: " + product_name,
              bg=bg_color,
              fg='black',
-             font=('Arial', 30, 'underline', 'bold')
-             ).grid(row=0, column=1, padx=150, pady=20)
+             font=('Arial', 20, 'underline', 'bold')
+             ).grid(row=0, column=1, padx=100, pady=20)
 
     # Konfigurering av Treeview som visar informationen
     style=ttk.Style()
@@ -537,12 +537,12 @@ def load_stats ():
 
 # Initialiserar applikationen
 root=tk.Tk()
-# root.attributes('-fullscreen',True)  ---Commented out for testing phase.
+root.attributes('-fullscreen',True)
 # Sätter rubrik och storlek på applikationen
 root.title("Smart Scale")
 root.geometry("800x480")
 
-# root.resizable(False, False) -- Commented out for now
+root.resizable(False, False)
 
 # Skapar alla frames som används
 main=tk.Frame(root, width=800, height=480, bg=bg_color)
