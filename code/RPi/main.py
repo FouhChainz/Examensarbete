@@ -2,11 +2,9 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-import time
 import serial
 import datetime
 import mysql.connector
-import tksheet
 import weather
 from mysql.connector import Error
 
