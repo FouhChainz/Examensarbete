@@ -1,13 +1,14 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import xgboost as xgb
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
-# Read the CSV file into a pandas DataFrame
-df = pd.read_csv("/Users/christianzhaco/PycharmProjects/Examensarbete/code/data_totaled.csv")
-# Replace any string values in the 'sold' column with NaN values
+
+# Load the data
+df = pd.read_csv("/Users/christianzhaco/Skola/PycharmProjects/Examensarbete/code/data_totaled.csv")
+
 
 # Convert the 'sold' column to a numeric type
 # Replace the "−" sign with "-"
@@ -23,40 +24,45 @@ df = df.set_index('date')
 
 # Drop any rows with NaN values
 df = df.dropna()
+
 # Split the data into training and testing sets
 X = df[['temp'
     , 'weekday_1', 'weekday_2', 'weekday_3', 'weekday_4', 'weekday_5', 'weekday_6', 'weekday_7'
     , 'weather_status_Klart', 'weather_status_Moln', 'weather_status_Regn', 'weather_status_Snö']]
 y = df[['sold']]
 
-# Extract the features and target columns
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=110, shuffle=False)
+# Split the data into training and testing sets
+train_data, test_data, train_target, test_target= train_test_split(X, y, test_size=110, shuffle=False)
 
-model = LinearRegression()
-# Fit a multiple linear regression model on the training data
-reg = LinearRegression().fit(X_train, y_train)
 
-# Use the model to make predictions on the test data
-predictions = reg.predict(X_test)
+# Create the XGBoost model
+xgb_model = xgb.XGBRegressor()
+
+# Train the model
+xgb_model.fit(train_data, train_target)
+
+# Make predictions on the test data
+predictions = xgb_model.predict(test_data)
 
 # Calculate the mean squared error and root mean squared error
-mse = mean_squared_error(y_test, predictions)
+mse = mean_squared_error(test_target, predictions)
 rmse = np.sqrt(mse)
 
 # Print the MSE and RMSE
 print('MSE:', mse)
 print('RMSE:', rmse)
-print("predictions:",predictions)
 
-multiple_linear_regression_data = pd.DataFrame(predictions)
-multiple_linear_regression_data.to_csv("multiple_linear_regression_data.csv",index=False)
+
+
+# Evaluate the model
+score = xgb_model.score(test_data, test_target)
+print("Model score: {:.2f}%".format(score * 100))
 
 # Plot the predicted sales vs actual sales
-plt.plot(y.index,df['sold'], label="Actual")
-plt.plot(y_test.index,predictions, label="Predicted")
-plt.xlabel("Date")
-plt.ylabel("Sales")
-plt.title("Actual vs Predicted Sales")
+plt.plot(y.index,df['sold'], label="Sålda")
+plt.plot(test_target.index,predictions, label="Prediktion")
+plt.xlabel("Datum")
+plt.ylabel("Antal sålda rätter")
+plt.title("Sålda vs Förutspådd Försäljning")
 plt.legend()
-plt.xticks(rotation=45)  # Rotate the X axis labels to avoid overlap
 plt.show()

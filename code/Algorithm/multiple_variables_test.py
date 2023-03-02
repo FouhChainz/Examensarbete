@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 # Load the data
-df = pd.read_csv('/Users/christianzhaco/PycharmProjects/Examensarbete/data/sales_data.csv')
+df = pd.read_csv('/data/sales_data.csv')
 
 # Clean and prepare the data
 df.dropna(inplace=True)

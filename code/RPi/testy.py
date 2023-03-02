@@ -1,13 +1,7 @@
 import tkinter as tk
-from tkinter import *
-import time
-import serial
 import datetime
 import weather
-import load_main
-import load_search
-import load_scale
-
+from code.RPi import load_main
 
 searchString= 'init value'
 todays_date = datetime.date.today()

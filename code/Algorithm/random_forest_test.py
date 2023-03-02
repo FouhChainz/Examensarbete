@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
 
 # Load the data
-weather = pd.read_csv("/Users/christianzhaco/PycharmProjects/Examensarbete/data/weather_main.csv")
-dishes = pd.read_csv("/Users/christianzhaco/PycharmProjects/Examensarbete/data/dishes_main.csv")
+weather = pd.read_csv("/data/weather_main.csv")
+dishes = pd.read_csv("/data/dishes_main.csv")
 
 # Combine the data into one DataFrame
 df=pd.merge(dishes, weather, on='date', how='outer')

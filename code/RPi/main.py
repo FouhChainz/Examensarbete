@@ -1,19 +1,32 @@
 import tkinter as tk
 from tkinter import *
+from tkinter import ttk
+from tkinter import messagebox
 import time
 import serial
 import datetime
-import weather
 import mysql.connector
+import tksheet
+import weather
 from mysql.connector import Error
 
+# Initierar värden och hämtar från tiden.
 searchString='init value'
-
 todays_date=datetime.date.today()
-weather_status=weather.weather_description
 weather_temp=weather.current_temperature
 date_string=todays_date.strftime('%Y-%m-%d')
 
+# Hämtar väderstatusen från API och översätter till svenska
+if weather.weather_status == "Clear":
+    weather_status="Klart"
+if weather.weather_status == "Clouds":
+    weather_status="Moln"
+if weather.weather_status == "Rain":
+    weather_status="Regn"
+if weather.weather_status == "Snow":
+    weather_status="Snö"
+
+# Initieraring av värden, flagga används för att ha koll på vilken knapp man tryckt på första skärmen
 flagga=0
 product_weight=0
 product_name="testy"
@@ -31,17 +44,18 @@ bg_color="#3d6466"
 #     bytesize=serial.EIGHTBITS,
 #     timeout=None)
 
-# Create function to send a signal to scale that it should weigh current object
+# Skapa en funktion som skickar en signal till vågen som läser nuvarande vikt från våg
 def serial_write ():
     ser.write(b's')
 
 
-# Create function to read full line from scale and return it
+# Skapa en funktion som läser in en rad från vågen och sparar den i en variabel
 def serial_read ():
     x=ser.readline()
     return x
 
 
+# Skapa en funktion som upprättar en koppling till databasen samt som kallas på när man ska spara värde till databasen
 def write_to_database (
         datum=todays_date,
         temperature=weather_temp,
@@ -73,7 +87,7 @@ def write_to_database (
 
         value2=(date_string, weight)
         value3=(date_string, temperature, weather_status)
-        cursor.execute(mySql_insert_query, )
+        cursor.execute(mySql_insert_query)
         cursor.execute(mySql_insert_query2, value2)
         cursor.execute(mySql_insert_query3, value3)
 
@@ -91,6 +105,7 @@ def write_to_database (
             print("MySQL connection is closed")
 
 
+# Skapa en funktion som tar in en sökning från tangentbordet och returnerar alla objekt från databasen i den tabellen
 def read_from_database ():
     try:
         connection=mysql.connector.connect(host='localhost',
@@ -100,28 +115,31 @@ def read_from_database ():
         cursor=connection.cursor()
 
         name=product_name
-        weight=product_weight[ 8:12 ]
 
-        mySql_insert_query="""SHOW TABLES LIKE """ + \
-                           name + \
-                           """;"""
+        mySql_get_query="""SELECT * FROM """ + \
+                        name + \
+                        """;"""
 
-        return_statement=cursor.execute(mySql_insert_query)
+        cursor.execute(mySql_get_query)
+        entries=cursor.fetchall()
 
+        print("Record read successfully from " + product_name + " table")
         connection.commit()
-        print("Record inserted successfully into %s table")
+
+
 
     except mysql.connector.Error as error:
-        print("Failed to insert into MySQL table {}".format(error))
+        print("Failed to read from MySQL table {}".format(error))
 
     finally:
         if connection.is_connected():
             cursor.close()
             connection.close()
             print("MySQL connection is closed")
+            return entries
 
 
-# Removes all widgets in all frames to prepare for next frame
+# Skapa en funktion som rensar skärmen för att förbereda inför nästa Frame
 def clear_widgets ():
     for frame in (main, search, scale):
         # Select all frame widgets and delete them
@@ -129,17 +147,20 @@ def clear_widgets ():
             widget.destroy()
 
 
-# Kill application
+# Dödar applikationen
 def close ():
     root.destroy()
     root.quit()
 
 
+# Skapa en funktion som kallas på när man trycker på "ny sökning" på hemskärmen, sätter flaggan till 1 och laddar sökskärmen
 def ny_sökning ():
     global flagga
     flagga=1
     load_search()
 
+
+# Skapa en funktion som kallas på när man trycker på "se statistik" på hemskärmen, sätter flaggan till 0 och laddar sökskärmen
 
 def se_statistik ():
     global flagga
@@ -147,15 +168,15 @@ def se_statistik ():
     load_search()
 
 
-# Load main(start) page
+# Laddar start-sidan
 def load_main ():
     clear_widgets()
-    # Stack Main frame above other frames
+    # Stackar mainframen längst fram
     main.tkraise()
-    # Prevent widgets from modifying the frame
+    # Hindrar widgets från att ändra storleken på applikationen
     main.pack_propagate(False)
 
-    # Create label widget for instructions
+    # Skapa en label för rubrik på sidan
     tk.Label(
         main,
         text="Utrustning för sparande av vägd produkt",
@@ -163,7 +184,7 @@ def load_main ():
         fg="white",
     ).pack(pady=20)
 
-    # Create button widget
+    # Skapa en button som leder till vägnings-skärmen
     tk.Button(
         main,
         text="Ny Vägning",
@@ -173,9 +194,10 @@ def load_main ():
         command=lambda:ny_sökning()
     ).pack(pady=20)
 
-    # Create a Button to call close()
+    # Skapa en button som kallar på close funktionen
     tk.Button(main, text="Kill App", command=close).grid(row=0, column=1, columnspan=5, padx=5, pady=5)
 
+    # Skapa en button som leder till statistik-skärmen
     tk.Button(
         main,
         text="Se lagrad data",
@@ -186,13 +208,14 @@ def load_main ():
     ).pack(pady=20)
 
 
+# Skapa en frame för inmatning av strängar
 def load_search (searchString=searchString):
     clear_widgets()
     # Stack Search frame above other frames
     search.tkraise()
     main.pack_propagate(False)
 
-    # Title text
+    # Rubrik label
     tk.Label(
         search,
         text="Sök efter önskad produkt",
@@ -201,7 +224,7 @@ def load_search (searchString=searchString):
         font=("Ubuntu", 20)
     ).grid(row=0, column=1, columnspan=15)
 
-    # 'back' button widget
+    # Button widget som leder till föregående skärm
     tk.Button(
         search,
         text="BACK",
@@ -211,22 +234,22 @@ def load_search (searchString=searchString):
         command=lambda:load_main()
     ).grid(row=0, column=0)
 
-    # Create a Button to call close()
+    # Skapa en button som kallar på close funktionen
     tk.Button(search, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
 
-    # Load textbox that shows input
+    # Skapar en textbox som visar inmatning
     textArea=tk.Text(search,
                      height=5,
                      width=50
                      )
     textArea.grid(row=1, column=2, columnspan=15)
 
-    # Function that controls logic behind button presses
+    # Funktion som styr logiken bakom det egenskapade tangentbordet
     def select (value, textArea=textArea, searchString=searchString):
-        # Add blankspace
+        # Kollar om inmatningsvärdet är "space"
         if value == 'Space':
             textArea.insert(INSERT, ' ')
-        # Loads next page depending on what you pressed on the main page
+        # Laddar nästa skärm utefter vad flaggan blev satt till i tidigare funktioner
         elif value == 'Enter':
             global product_name
             product_name=load_search.searchString
@@ -236,13 +259,13 @@ def load_search (searchString=searchString):
                 load_scale()
             elif not flagga:
                 load_stats()
-        # Remove last pressed letter
+        # Tar bort senaste inmatade tecknet
         elif value == '←':
             i=textArea.get(1.0, END)
             j=i[ :-2 ]
             textArea.delete(1.0, END)
             textArea.insert(INSERT, j)
-        # Change to CAPITAL LETTERS
+        # Aktiverar CAPS LOCK och byter till stora bokstäver på tangentbordet
         elif value == 'Caps':
             capsButtons=[ 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 'Å', '←',
                           'CAPS', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ö', 'Ä', 'Enter',
@@ -251,7 +274,7 @@ def load_search (searchString=searchString):
 
             varRow=2
             varColumn=1
-
+            # Logik för visande av tangentbord på skärm
             for button in capsButtons:
                 command=lambda x=button:select(x)
                 if button != 'Enter' and button != 'Space' and button != '':
@@ -276,7 +299,7 @@ def load_search (searchString=searchString):
                     varColumn=1
                     varRow+=1
 
-        # Change from CAPITAL LETTERS to Small
+        # Ändrar från stora till små bokstäver
         elif value == 'CAPS':
             varRow=2
             varColumn=1
@@ -310,7 +333,7 @@ def load_search (searchString=searchString):
                     varColumn=1
                     varRow+=1
 
-        # Save pressed button to search string
+        # Sparar inmatad knapp till söksträng
         else:
             textArea.insert(INSERT, value)
             load_search.searchString=textArea.get(1.0, END)
@@ -322,7 +345,7 @@ def load_search (searchString=searchString):
               'Caps', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'ö', 'ä', 'Enter',
               '', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '-',
               'Space' ]
-
+    # Logik för att visa tangentbord på skärm
     for button in buttons:
         command=lambda x=button:select(x)
         if button != 'Enter' and button != 'Space' and button != '':
@@ -346,10 +369,9 @@ def load_search (searchString=searchString):
             varRow+=1
 
 
-# Load frame where you weigh products
+# Laddar frame där man väger produkten
 def load_scale ():
     clear_widgets()
-    # Stack Frame 3 over the others
     scale.tkraise()
     scale.pack_propagate(False)
 
@@ -357,20 +379,27 @@ def load_scale ():
     # Add Save button that saves to database
     # Confirm popup with all data - Product - date/weight/weather. After confirm load_frame1()
 
-    # Create a Button to call close()
+    # Skapar en knapp som dödar applikationen
     tk.Button(scale, text="Kill App", command=close).grid(row=0, column=2, pady=2, padx=2)
 
-    # Create a button to return to previous frame
+    # Skapar en knapp som tar en tillbaka till föregående frame
     tk.Button(scale, text="BACK", command=lambda:load_search()).grid(row=0, column=0)
 
+    # Funktion för att skicka signal till våg och läsa returnerade svar vid vägning
     def reWeigh ():
         serial_write()
         output=serial_read()
-        global product_weight
-        product_weight=output
-        vvalue.set(product_weight)
-        write_to_database()
+        # Kontrollerar ifall koppling till vågen är etablerad och ett värde utläses
+        if output is None:
+            messagebox.askretrycancel("Värde ej inläst", "Ingen signal från våg")
+        # Om koppling finns så sparas värdet och skrivs sedan till databasen
+        else:
+            global product_weight
+            product_weight=output
+            vvalue.set(product_weight)
+            write_to_database()
 
+    # Label med produktens namn
     tk.Label(scale,
              text=product_name,
              width=20,
@@ -378,49 +407,58 @@ def load_scale ():
              fg='black',
              font=('Arial', 30, 'bold', 'underline')
              ).grid(row=0, column=1, pady=6)
-
+    # Knapp för att väga, kallar på reWeigh() funktionen när den blir nedtryckt
     tk.Button(scale,
               text="VÄG",
               command=lambda:reWeigh()
               ).grid(row=2, column=1, pady=20, ipadx=5, ipady=5)
-
+    # Initiellt värde på variabel som syns i textrutan där vikten senare syns
     vvalue=tk.StringVar(scale, value="Ställ din produkt på vågen och tryck på 'VÄG' ")
+    # Label som sparar den inlästa vikten
     tk.Label(scale,
              textvariable=vvalue,
              height=5,
              width=50,
              font=("Arial", 15)
              ).grid(row=1, column=0, columnspan=3, padx=20, pady=10)
-
+    # Label är rubrik som visas ovanför dagens datum
     tk.Label(scale,
              text="Dagens Datum",
              height=5,
              width=20,
              font=('Arial', 15, 'bold')
              ).grid(row=3, column=0, padx=20)
+    # Label som visar dagens datum på skärmen
     tk.Label(scale,
              text=todays_date,
              height=5,
              width=20
              ).grid(row=4, column=0, pady=10)
 
+    # Label är rubrik som visas ovanför dagens temperatur
     tk.Label(scale,
              text="Temperatur (°C)",
              height=5,
              width=20,
              font=('Arial', 15, 'bold')
              ).grid(row=3, column=1, padx=20)
+
+    # Label som visar dagens temperatur
     tk.Label(scale,
              text=weather_temp,
              height=5,
              width=15
              ).grid(row=4, column=1, pady=10)
+
+    # Label är rubrik som visas ovanför dagens väderstatus
     tk.Label(scale,
              text="Väder",
              height=5,
              width=15,
              font=('Arial', 15, 'bold')
              ).grid(row=3, column=2, padx=20)
+
+    # Label som visar dagens väderstatus i textform för den inställda staden
     tk.Label(scale,
              text=weather_status,
              height=5,
@@ -428,40 +466,96 @@ def load_scale ():
              ).grid(row=4, column=2, pady=10)
 
 
+# Skapar en frame som visar upp inläst statistik från databasen, datum och förbrukad vikt per dag för specifik produkt
 def load_stats ():
     clear_widgets()
-    # Stack Frame 3 over the others
     stats.tkraise()
     stats.pack_propagate(False)
 
+    # Skapar en knapp som dödar applikationen
+    tk.Button(stats, text="Kill App", command=close).grid(row=1, column=0, pady=2, padx=2)
+
+    # Skapar en knapp som leder tillbaka till föregående skärm
+    tk.Button(stats, text="BACK", command=lambda:load_search()).grid(row=0, column=0)
+
+    # Kallar på funktion som läser från databasen för inmatad produkt och sparar det till variabel
+    read_from_db=read_from_database()
+    # Sätter längden på antalet rader som skall returneras till antalet rader i tabellen som utläses från databasen
+    total_rows=len(read_from_db)
+
+    # Label för rubrik som säger vad sidan visar för produkt
     tk.Label(stats,
-             text=read_from_database.return_statement,
-             width=20,
+             text="REGISTRERADE VÄGNINGAR AV: " + product_name,
              bg=bg_color,
              fg='black',
-             font=('Arial', 30, 'bold', 'underline')
-             ).grid(row=0, column=0)
+             font=('Arial', 30, 'underline', 'bold')
+             ).grid(row=0, column=1, padx=150, pady=20)
+
+    # Konfigurering av Treeview som visar informationen
+    style=ttk.Style()
+    style.configure("Treeview",
+                    background="silver",
+                    foreground="black",
+                    rowheight=25,
+                    fieldbackground="silver"
+                    )
+
+    # Skapar en Treeview som skall hålla informationen
+    my_tree=ttk.Treeview(stats)
+
+    # Initierar de kolumner som skall finnas i Treeviewen och namnsätter dem
+    my_tree[ 'columns' ]=("Datum", "Vikt")
+
+    # Formaterar kolumner, sätter deras bredd och centrering
+    my_tree.column("#0", width=80)
+    my_tree.column("Datum", anchor=W, width=200)
+    my_tree.column("Vikt", anchor=CENTER, width=150)
+
+    # Sätter rubriker på kolumnerna
+    my_tree.heading("#0", text="Ingredient", anchor=W)
+    my_tree.heading("Datum", text="Datum", anchor=W)
+    my_tree.heading("Vikt", text="Vikt(g)", anchor=CENTER)
+
+    # Logik för att göra varannan rad grå för enklare läsning
+    my_tree.tag_configure("oddrow", background="white")
+    my_tree.tag_configure("evenrow", background="grey95")
+
+    # Logik för att skriva ut de inlästa värdena från databasen på skärmen
+    count=0
+    for i in range(total_rows):
+        if count % 2 == 0:
+            my_tree.insert(parent='', index='end', iid=count, text=product_name,
+                           values=(read_from_db[ i ][ 0 ], read_from_db[ i ][ 1 ]),
+                           tags=('evenrow'))
+        else:
+            my_tree.insert(parent='', index='end', iid=count, text=product_name,
+                           values=(read_from_db[ i ][ 0 ], read_from_db[ i ][ 1 ]),
+                           tags=('oddrow'))
+        count+=1
+
+    my_tree.pack(pady=80)
 
 
-# Initialize app
+# Initialiserar applikationen
 root=tk.Tk()
 # root.attributes('-fullscreen',True)  ---Commented out for testing phase.
+# Sätter rubrik och storlek på applikationen
 root.title("Smart Scale")
 root.geometry("800x480")
 
 # root.resizable(False, False) -- Commented out for now
 
-# Create a frame widget and places it in grid location
+# Skapar alla frames som används
 main=tk.Frame(root, width=800, height=480, bg=bg_color)
 search=tk.Frame(root, width=800, height=480, bg=bg_color)
 scale=tk.Frame(root, width=800, height=480, bg=bg_color)
 stats=tk.Frame(root, width=800, height=480, bg=bg_color)
 
-# Sort grid in all frames
+# Sorterar alla frames i root-fönster
 for frame in (main, search, scale, stats):
     frame.grid(row=0, column=0, sticky="nesw")
 
-# Load start page
+# Laddar startsidan
 load_main()
-# Run app
+# Startar applikationen
 root.mainloop()

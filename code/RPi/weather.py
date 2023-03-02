@@ -47,12 +47,15 @@ if x["cod"] != "404":
     # to the "description" key at
     # the 0th index of z
     weather_description=z[0]["description"]
+    weather_status=z[0]["main"]
 
     # print following values
     print(" Temperatur (C) = " +
           str(current_temperature) +
           "\n Väder Status = " +
-          str(weather_description))
+          str(weather_status))
+
+
 
 else:
     print(" City Not Found ")

@@ -6,8 +6,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 # Load data
-weather = pd.read_csv("/Users/christianzhaco/PycharmProjects/Examensarbete/data/weather_main.csv")
-sales = pd.read_csv("/Users/christianzhaco/PycharmProjects/Examensarbete/data/dishes_main.csv")
+weather = pd.read_csv("/Users/christianzhaco/Skola/PycharmProjects/Examensarbete/data/weather_main.csv")
+sales = pd.read_csv("/Users/christianzhaco/Skola/PycharmProjects/Examensarbete/data/dishes_main.csv")
 
 # Merge data into a single dataframe
 df = pd.merge(weather, sales, on='date')
@@ -41,10 +41,10 @@ comparison = pd.DataFrame(y_pred)
 comparison.to_csv("comparison.csv",index=False)
 
 # Plot actual vs predicted sales
-plt.plot(y.index,y, label="Actual")
-plt.plot(y_test.index,y_pred, label="Predicted")
-plt.xlabel("Actual Sales")
-plt.ylabel("Predicted Sales")
-plt.title("Actual vs Predicted Sales")
+plt.plot(y.index,y, label="Sålda")
+plt.plot(y_test.index,y_pred, label="Prediktion")
+plt.xlabel("Datum")
+plt.ylabel("Antal sålda rätter")
+plt.title("Sålda vs Förutspådd Försäljning")
 plt.legend()
 plt.show()
