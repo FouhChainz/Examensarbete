@@ -177,7 +177,7 @@ def load_main ():
     # Skapa en label för rubrik på sidan
     tk.Label(
         main,
-        text="Utrustning för sparande av vägd produkt",
+        text="Smart Scale",
         bg=bg_color,
         fg="white",
     ).pack(pady=20)
@@ -185,9 +185,9 @@ def load_main ():
     # Skapa en button som leder till vägnings-skärmen
     tk.Button(
         main,
-        text="Ny Vägning",
+        text="Väg ingrediens",
         width=50,
-        height=10,
+        height=9,
         bg="#28393a",
         command=lambda:ny_sökning()
     ).pack(pady=20)
@@ -198,9 +198,9 @@ def load_main ():
     # Skapa en button som leder till statistik-skärmen
     tk.Button(
         main,
-        text="Se lagrad data",
+        text="Tidigare vägningar",
         width=50,
-        height=10,
+        height=9,
         bg="#28393a",
         command=lambda:se_statistik()
     ).pack(pady=20)
@@ -233,7 +233,7 @@ def load_search (searchString=searchString):
     ).grid(row=0, column=0)
 
     # Skapa en button som kallar på close funktionen
-    tk.Button(search, text="Kill App", command=close).grid(row=0, column=1, columnspan=5)
+    tk.Button(search, text="Kill App", command=close).grid(row=1, column=0)
 
     # Skapar en textbox som visar inmatning
     textArea=tk.Text(search,
@@ -495,7 +495,7 @@ def load_stats ():
 
     # Skapa scrollbar
     tree_scroll = Scrollbar(tree_frame)
-    tree_scroll.pack(side=RIGHT, fill=Y)
+    tree_scroll.pack(side=RIGHT, fill=Y,expand=5)
 
     # Konfigurering av Treeview som visar informationen
     style=ttk.Style()
