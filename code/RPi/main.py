@@ -242,7 +242,7 @@ def load_search (searchString=searchString):
                      width=20,
                      font=("Ubuntu",30)
                      )
-    textArea.grid(row=1, column=2, columnspan=15,pady=5)
+    textArea.grid(row=1, column=1, columnspan=15,pady=5)
 
     # Funktion som styr logiken bakom det egenskapade tangentbordet
     def select (value, textArea=textArea, searchString=searchString):
@@ -284,7 +284,7 @@ def load_search (searchString=searchString):
                     tk.Button(search, text=button, width=50, height=4, command=command).grid(row=5, column=1,
                                                                                              columnspan=25)
                 if button == 'Enter':
-                    tk.Button(search, text=button, width=3, height=6, command=command).grid(row=3, column=12)
+                    tk.Button(search, text=button, width=3, height=5, command=command).grid(row=3, column=12)
                 if button == '':
                     tk.Button(search)
 
@@ -318,7 +318,7 @@ def load_search (searchString=searchString):
                     tk.Button(search, text=button, width=50, height=4, command=command).grid(row=5, column=1,
                                                                                              columnspan=25)
                 if button == 'Enter':
-                    tk.Button(search, text=button, width=3, height=6, command=command).grid(row=3, column=12)
+                    tk.Button(search, text=button, width=3, height=5, command=command).grid(row=3, column=12)
                 if button == '':
                     tk.Button(search)
 
@@ -353,7 +353,7 @@ def load_search (searchString=searchString):
         if button == 'Space':
             tk.Button(search, text=button, width=50, height=4, command=command).grid(row=5, column=1, columnspan=25)
         if button == 'Enter':
-            tk.Button(search, text=button, width=3, height=6, command=command).grid(row=3, column=12)
+            tk.Button(search, text=button, width=3, height=5, command=command).grid(row=3, column=12)
         if button == '':
             tk.Button(search)
 
@@ -403,11 +403,11 @@ def load_scale ():
     # Label med produktens namn
     tk.Label(scale,
              text=product_name,
-             width=20,
+             width=16,
              bg=bg_color,
-             fg='black',
-             font=('Arial', 30, 'bold', 'underline')
-             ).grid(row=0, column=1, pady=6)
+             fg='white',
+             font=('Ubuntu', 30, 'bold')
+             ).grid(row=0, column=1)
     # Knapp för att väga, kallar på reWeigh() funktionen när den blir nedtryckt
     tk.Button(scale,
               text="VÄG",
@@ -488,8 +488,8 @@ def load_stats ():
     tk.Label(stats,
              text="REGISTRERADE VÄGNINGAR AV: " + product_name,
              bg=bg_color,
-             fg='black',
-             font=('Arial', 20, 'underline', 'bold')
+             fg='white',
+             font=('Ubuntu', 20, 'bold')
              ).grid(row=0, column=1, padx=100, pady=20)
 
     tree_frame = Frame(stats)
