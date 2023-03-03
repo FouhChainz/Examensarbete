@@ -398,7 +398,11 @@ def load_scale ():
             global product_weight
             product_weight=output
             vvalue.set(product_weight)
-            write_to_database()
+
+    tk.Button(scale,
+              text="Spara vikt",
+              command=write_to_database()
+              ).grid(row=2,column=2,columnspan=2)
 
     # Label med produktens namn
     tk.Label(scale,
