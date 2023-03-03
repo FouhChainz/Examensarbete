@@ -28,6 +28,7 @@ if weather.weather_status == "Snow":
 flagga=0
 product_weight=0
 product_name="testy"
+read_success = 0
 
 # Background color dark-green
 bg_color="#3d6466"
@@ -114,16 +115,18 @@ def read_from_database ():
 
         name=product_name
 
-        mySql_get_query="""SELECT * FROM """ + \
-                        name + \
-                        """;"""
+        mySql_get_query="""SELECT """ + name + """.date, """ + name + """.amount,
+         väder.temperatur, väder.väder_status 
+        FROM """ + name + \
+        """JOIN väder ON väder.datum = """  + name + """.date;"""
 
         cursor.execute(mySql_get_query)
         entries=cursor.fetchall()
 
         print("Record read successfully from " + product_name + " table")
+        global read_success
+        read_success = 1
         connection.commit()
-
 
 
     except mysql.connector.Error as error:
@@ -139,7 +142,7 @@ def read_from_database ():
 
 # Skapa en funktion som rensar skärmen för att förbereda inför nästa Frame
 def clear_widgets ():
-    for frame in (main, search, scale):
+    for frame in (main, search, scale, stats):
         # Select all frame widgets and delete them
         for widget in frame.winfo_children():
             widget.destroy()
@@ -186,7 +189,7 @@ def load_main ():
     # Skapa en button som leder till vägnings-skärmen
     tk.Button(
         main,
-        text="Väg ingrediens",
+        text="Väg produkt",
         width=50,
         height=9,
         bg="#28393a",
@@ -376,6 +379,7 @@ def load_scale ():
     scale.pack_propagate(False)
     output=None
 
+
     # Todo
     # Add Save button that saves to database
     # Confirm popup with all data - Product - date/weight/weather. After confirm load_frame1()
@@ -399,11 +403,6 @@ def load_scale ():
             product_weight=output
             vvalue.set(product_weight)
 
-    tk.Button(scale,
-              text="Spara vikt",
-              command=write_to_database()
-              ).grid(row=2,column=2,columnspan=2)
-
     # Label med produktens namn
     tk.Label(scale,
              text=product_name,
@@ -419,6 +418,7 @@ def load_scale ():
               ).grid(row=2, column=1, pady=20, ipadx=5, ipady=5)
     # Initiellt värde på variabel som syns i textrutan där vikten senare syns
     vvalue=tk.StringVar(scale, value="Ställ din produkt på vågen och tryck på 'VÄG' ")
+
     # Label som sparar den inlästa vikten
     tk.Label(scale,
              textvariable=vvalue,
@@ -426,6 +426,10 @@ def load_scale ():
              width=50,
              font=("Arial", 12)
              ).grid(row=1, column=0, columnspan=3, padx=20, pady=10)
+
+    reWeigh()
+    tk.Button(scale, text="Spara vikt", command=write_to_database).grid(row=2,column=2)
+
     # Label är rubrik som visas ovanför dagens datum
     tk.Label(scale,
              text="Dagens Datum",
@@ -476,79 +480,103 @@ def load_stats ():
     clear_widgets()
     stats.tkraise()
     stats.pack_propagate(False)
+    global read_success
 
-    # Skapar en knapp som dödar applikationen
-    tk.Button(stats, text="Kill App", command=close).grid(row=1, column=0, pady=2, padx=2)
+    tk.Button(stats, text="Kill App", command=close).grid(row=0, column=0, pady=2, padx=2)
+    tk.Label(
+        stats,
+        text="Ingen produkt hittad, var god försök igen",
+        bg=bg_color,
+        fg="white",
+        font=("Ubuntu", 30)
+    ).grid(row=0, column=1, padx=20, pady=20)
 
     # Skapar en knapp som leder tillbaka till föregående skärm
-    tk.Button(stats, text="BACK", command=lambda:load_search()).grid(row=0, column=0)
+    tk.Button(stats, text="Tillbaka",
+              command=lambda:load_search()
+              ,width=20,
+              height=5).grid(row=1, column=1)
 
-    # Kallar på funktion som läser från databasen för inmatad produkt och sparar det till variabel
     read_from_db=read_from_database()
-    # Sätter längden på antalet rader som skall returneras till antalet rader i tabellen som utläses från databasen
-    total_rows=len(read_from_db)
+    if read_success == 1:
+        clear_widgets()
 
-    # Label för rubrik som säger vad sidan visar för produkt
-    tk.Label(stats,
-             text="REGISTRERADE VÄGNINGAR AV: " + product_name,
-             bg=bg_color,
-             fg='white',
-             font=('Ubuntu', 20, 'bold')
-             ).grid(row=0, column=1, padx=100, pady=20)
+        # Kallar på funktion som läser från databasen för inmatad produkt och sparar det till variabel
+        # Sätter längden på antalet rader som skall returneras till antalet rader i tabellen som utläses från databasen
+        total_rows=len(read_from_db)
+        tk.Button(stats, text="BACK", command=lambda:load_search()).grid(row=0, column=0)
+        tk.Button(stats, text="Kill App", command=close).grid(row=0, column=2)
 
-    tree_frame = Frame(stats)
-    tree_frame.pack(pady=80)
+        # Label för rubrik som säger vad sidan visar för produkt
+        tk.Label(stats,
+                 text="REGISTRERADE VÄGNINGAR AV: " + product_name,
+                 bg=bg_color,
+                 fg='white',
+                 font=('Ubuntu', 20, 'bold')
+                 ).grid(row=0, column=1, padx=100, pady=20)
 
-    # Skapa scrollbar
-    tree_scroll = Scrollbar(tree_frame)
-    tree_scroll.pack(side=RIGHT, fill=Y,expand=5)
+        tree_frame = Frame(stats)
+        tree_frame.pack(pady=80)
 
-    # Konfigurering av Treeview som visar informationen
-    style=ttk.Style()
-    style.configure("Treeview",
-                    background="silver",
-                    foreground="black",
-                    rowheight=25,
-                    fieldbackground="silver"
-                    )
+        # Skapa scrollbar
+        tree_scroll = Scrollbar(tree_frame)
+        tree_scroll.pack(side=RIGHT, fill=Y,expand=5)
 
-    # Skapar en Treeview som skall hålla informationen
-    my_tree=ttk.Treeview(tree_frame)
+        # Konfigurering av Treeview som visar informationen
+        style=ttk.Style()
+        style.configure("Treeview",
+                        background="silver",
+                        foreground="black",
+                        rowheight=25,
+                        fieldbackground="silver"
+                        )
 
-    my_tree.configure(yscrollcommand=tree_scroll.set)
-    tree_scroll.config(command=my_tree.yview)
+        # Skapar en Treeview som skall hålla informationen
+        my_tree=ttk.Treeview(tree_frame)
 
-    # Initierar de kolumner som skall finnas i Treeviewen och namnsätter dem
-    my_tree[ 'columns' ]=("Datum", "Vikt")
+        my_tree.configure(yscrollcommand=tree_scroll.set)
+        tree_scroll.config(command=my_tree.yview)
 
-    # Formaterar kolumner, sätter deras bredd och centrering
-    my_tree.column("#0", width=80)
-    my_tree.column("Datum", anchor=W, width=200)
-    my_tree.column("Vikt", anchor=CENTER, width=150)
+        # Initierar de kolumner som skall finnas i Treeviewen och namnsätter dem
+        my_tree[ 'columns' ]=("Datum", "Vikt","Temp","Väder")
 
-    # Sätter rubriker på kolumnerna
-    my_tree.heading("#0", text="Ingredient", anchor=W)
-    my_tree.heading("Datum", text="Datum", anchor=W)
-    my_tree.heading("Vikt", text="Vikt(g)", anchor=CENTER)
+        # Formaterar kolumner, sätter deras bredd och centrering
+        my_tree.column("#0", width=80)
+        my_tree.column("Datum", anchor=W, width=200)
+        my_tree.column("Vikt", anchor=W, width=150)
+        my_tree.column("Temp", anchor=W, width=150)
+        my_tree.column("Väder", anchor=W, width=150)
 
-    # Logik för att göra varannan rad grå för enklare läsning
-    my_tree.tag_configure("oddrow", background="white")
-    my_tree.tag_configure("evenrow", background="grey95")
 
-    # Logik för att skriva ut de inlästa värdena från databasen på skärmen
-    count=0
-    for i in range(total_rows):
-        if count % 2 == 0:
-            my_tree.insert(parent='', index='end', iid=count, text=product_name,
-                           values=(read_from_db[ i ][ 0 ], read_from_db[ i ][ 1 ]),
-                           tags=('evenrow'))
-        else:
-            my_tree.insert(parent='', index='end', iid=count, text=product_name,
-                           values=(read_from_db[ i ][ 0 ], read_from_db[ i ][ 1 ]),
-                           tags=('oddrow'))
-        count+=1
 
-    my_tree.pack()
+        # Sätter rubriker på kolumnerna
+        my_tree.heading("#0", text="Produkt", anchor=W)
+        my_tree.heading("Datum", text="Datum", anchor=W)
+        my_tree.heading("Vikt", text="Vikt(g)", anchor=W)
+        my_tree.heading("Temp", text="Temperatur(C)", anchor=W)
+        my_tree.heading("Väder", text="Väder", anchor=W)
+
+
+        # Logik för att göra varannan rad grå för enklare läsning
+        my_tree.tag_configure("oddrow", background="white")
+        my_tree.tag_configure("evenrow", background="grey95")
+
+        # Logik för att skriva ut de inlästa värdena från databasen på skärmen
+        count=0
+        for i in range(total_rows):
+            if count % 2 == 0:
+                my_tree.insert(parent='', index='end', iid=count, text=product_name,
+                               values=(read_from_db[ i ][ 0 ], read_from_db[ i ][ 1 ],read_from_db[ i ][ 2 ],read_from_db[ i ][ 3 ]),
+                               tags=('evenrow'))
+            else:
+                my_tree.insert(parent='', index='end', iid=count, text=product_name,
+                               values=(read_from_db[ i ][ 0 ], read_from_db[ i ][ 1 ],read_from_db[ i ][ 2 ],read_from_db[ i ][ 3 ]),
+                               tags=('oddrow'))
+            count+=1
+
+        my_tree.pack()
+
+
 
 
 # Initialiserar applikationen
