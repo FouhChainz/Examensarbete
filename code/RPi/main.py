@@ -180,6 +180,7 @@ def load_main ():
         text="Smart Scale",
         bg=bg_color,
         fg="white",
+        font=("Ubuntu",30)
     ).pack(pady=20)
 
     # Skapa en button som leder till vägnings-skärmen
@@ -237,10 +238,11 @@ def load_search (searchString=searchString):
 
     # Skapar en textbox som visar inmatning
     textArea=tk.Text(search,
-                     height=5,
-                     width=50
+                     height=2,
+                     width=20,
+                     font=("Ubuntu",30)
                      )
-    textArea.grid(row=1, column=2, columnspan=15)
+    textArea.grid(row=1, column=2, columnspan=15,pady=5)
 
     # Funktion som styr logiken bakom det egenskapade tangentbordet
     def select (value, textArea=textArea, searchString=searchString):
@@ -276,7 +278,7 @@ def load_search (searchString=searchString):
             for button in capsButtons:
                 command=lambda x=button:select(x)
                 if button != 'Enter' and button != 'Space' and button != '':
-                    tk.Button(search, text=button, width=2, height=5, command=command).grid(row=varRow,
+                    tk.Button(search, text=button, width=2, height=4, command=command).grid(row=varRow,
                                                                                             column=varColumn)
                 if button == 'Space':
                     tk.Button(search, text=button, width=50, height=4, command=command).grid(row=5, column=1,
@@ -310,7 +312,7 @@ def load_search (searchString=searchString):
             for button in buttons:
                 command=lambda x=button:select(x)
                 if button != 'Enter' and button != 'Space' and button != '':
-                    tk.Button(search, text=button, width=2, height=5, command=command).grid(row=varRow,
+                    tk.Button(search, text=button, width=2, height=4, command=command).grid(row=varRow,
                                                                                             column=varColumn)
                 if button == 'Space':
                     tk.Button(search, text=button, width=50, height=4, command=command).grid(row=5, column=1,
@@ -347,7 +349,7 @@ def load_search (searchString=searchString):
     for button in buttons:
         command=lambda x=button:select(x)
         if button != 'Enter' and button != 'Space' and button != '':
-            tk.Button(search, text=button, width=2, height=5, command=command).grid(row=varRow, column=varColumn)
+            tk.Button(search, text=button, width=2, height=4, command=command).grid(row=varRow, column=varColumn)
         if button == 'Space':
             tk.Button(search, text=button, width=50, height=4, command=command).grid(row=5, column=1, columnspan=25)
         if button == 'Enter':
